@@ -26,12 +26,13 @@
                     (map name args))
         res (apply sh cmd)]
     (if (= 0 (:exit res))
-      (println (:out res))
-      (println (:err res)))))
+      (:out res)
+      (:err res))))
 
 (defn login
   [password]
-  (start-local-wallet!)
+  (when-not (nil? @keosd)
+    (start-local-wallet!))
   (cleos "wallet" "open" "-n" "gzmask")
   (cleos "wallet" "unlock" "-n" "gzmask" "--password" password))
 
@@ -43,7 +44,6 @@
 (comment
   (login "password")
 
-  (cleos :get :info)
   (cleos :wallet :list)
   (cleos :get :account :hezdombqgege)
   (cleos :get :account :kingslanding)
