@@ -83,7 +83,7 @@
   (future
     (loop [result (buy-ram-limit-order+ram-fee amount price from to)]
       (Thread/sleep TRADE-INTERVAL)
-      ;(println "trying to buy" amount "EOS of RAM at" price)
+      (println "trying to buy" amount "EOS of RAM at" price)
       (if (nil? result)
         (recur (buy-ram-limit-order amount price from to))
         result))))
@@ -118,7 +118,7 @@
   (future
     (loop [result (sell-ram-limit-order+ram-fee amount price account)]
       (Thread/sleep TRADE-INTERVAL)
-      ;(println "trying to sell" amount "bytes of RAM at" price)
+      (println "trying to sell" amount "bytes of RAM at" price)
       (if (nil? result)
         (recur (sell-ram-limit-order amount price account))
         result))))

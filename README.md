@@ -1,10 +1,14 @@
 # ram-trader
 
-A Clojure library designed to ... well, that part is up to you.
 
 ## Usage
 
-FIXME
+open tmux
+
+lein trampoline run > trade.log
+
+Ctrl+b,d
+
 
 ## License
 

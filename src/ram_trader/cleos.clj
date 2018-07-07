@@ -18,7 +18,7 @@
         (str "--http-server-address=" keosd-http-server-address))))
 
 (defn cleos [& args]
-  (let [cmd (concat ["cleos"
+  (let [cmd (concat ["sudo" "docker" "exec" "eosio" "/opt/eosio/bin/cleos"
                      "--wallet-url" keosd-http-server-address
                      "-u" nodeos-http-server-address]
                     (map name args))
