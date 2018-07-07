@@ -1,6 +1,6 @@
 ;; pre-requirements:
 ;; cleos installed locally
-;; keosd installed locally
+;; keosd or nodeos wallet started locally
 ;; wallets located at ${HOME}/eosio-wallet}
 (ns ram-trader.cleos
   (:require [clojure.java.shell :refer [sh] :as jshell]
@@ -9,16 +9,13 @@
 
 (def ^:const keosd-http-server-address "http://127.0.0.1:8900")
 (def ^:const nodeos-http-server-address "http://api.eosnewyork.io")
-(def ^:const LOGIN-INTERVAL 30000) ;;milliseconds
-(def keosd (atom nil))
 
 (defn- start-local-wallet!
-  "returns a long running future. use (future-cancel future) to stop the wallet"
+  "Returns a long running future. use (future-cancel ...) to stop the wallet"
   []
-  (reset! keosd
-          (future
-            (sh "keosd" "--wallet-dir" "data-dir"
-                (str "--http-server-address=" keosd-http-server-address)))))
+  (future
+    (sh "keosd" "--wallet-dir" "data-dir"
+        (str "--http-server-address=" keosd-http-server-address))))
 
 (defn cleos [& args]
   (let [cmd (concat ["cleos"
@@ -33,37 +30,27 @@
 (defn cleos! [& args]
   (println (apply cleos args)))
 
-(defn login
-  [wallet-name password]
-  (when-not (nil? @keosd)
-    (start-local-wallet!))
-  (cleos :wallet :open "-n" wallet-name)
-  (cleos :wallet :unlock "-n" wallet-name "--password" password "--unlock-timeout" (str (/ LOGIN-INTERVAL 1000))))
-
 (defn- load-config []
   (read-string
    (slurp "resources/default.properties")))
 
-(defn keep-login []
-  (let [{password    :wallet-password
-         wallet-name :wallet-name} (load-config)]
-    (login wallet-name password)
-    (future (loop []
-              (Thread/sleep LOGIN-INTERVAL)
-              (login wallet-name password)
-              (recur)))))
+(defn login
+  ([] (let [{password    :wallet-password
+             wallet-name :wallet-name} (load-config)]
+        (login wallet-name password)))
+  ([wallet-name password]
+   (cleos :wallet :open "-n" wallet-name)
+   (cleos :wallet :unlock "-n" wallet-name "--password" password)))
 
 (defn logout-and-quit []
   (let [{password    :wallet-password
          wallet-name :wallet-name} (load-config)]
     (cleos "wallet" "lock" "-n" wallet-name)
-    (cleos "wallet" "stop")
-    (future-cancel keosd)))
+    (cleos "wallet" "stop")))
 
 (comment
-  (def login
-    (keep-login))
-  (future-cancel login)
+  (start-local-wallet!)
+  (login)
 
   (cleos! :wallet :list)
   (cleos! :get :account :hezdombqgege)

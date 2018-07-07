@@ -2,7 +2,7 @@
 ;; https://eosio.stackexchange.com/questions/847/how-to-get-current-last-ram-price?noredirect=1&lq=1
 (ns ram-trader.ram
   (:require [cheshire.core :as json]
-            [ram-trader.cleos :refer [cleos] :as cleos]))
+            [ram-trader.cleos :refer [cleos login] :as cleos]))
 
 (def ^:const RAM-FEE-RATE 0.005)
 (def ^:const TRADE-INTERVAL 5000) ;;milliseconds
@@ -25,7 +25,7 @@
   Price is:
   Connector Balance/(Smart Token’s Outstanding supply × Connector Weight)
   which is:
-  quote.balance / (base.balance * (quote.weight * 5))
+  quote.balance / (base.balance * (quote.weight * 2))
   "
   [query-result]
   (let [connector-balance  (-> query-result
@@ -54,6 +54,7 @@
       0.0001)))
 
 (defn buy-ram [from to amount]
+  (login)
   (cleos :system :buyram from to (str amount " EOS")))
 
 (defn buy-ram-limit-order
@@ -73,8 +74,8 @@
   "Also consider ram-fee"
   [amount price from to]
   (buy-ram-limit-order amount
-    (- price (->ram-fee amount))
-    from to))
+                       (- price RAM-FEE-RATE)
+                       from to))
 
 (defn buy-ram-limit-order+poll
   "polling buy order until successful"
@@ -82,12 +83,13 @@
   (future
     (loop [result (buy-ram-limit-order+ram-fee amount price from to)]
       (Thread/sleep TRADE-INTERVAL)
-      (println "trying to buy" amount "EOS of RAM at" price)
+      ;(println "trying to buy" amount "EOS of RAM at" price)
       (if (nil? result)
-        (recur (buy-ram-limit-order+ram-fee amount price from to))
+        (recur (buy-ram-limit-order amount price from to))
         result))))
 
 (defn sell-ram [account amount]
+  (login)
   (cleos :system :sellram account (str amount)))
 
 (defn sell-ram-limit-order
@@ -107,8 +109,8 @@
   "Also consider ram-fee"
   [amount price account]
   (sell-ram-limit-order amount
-    (+ price (->ram-fee amount))
-    account))
+                        (+ price RAM-FEE-RATE)
+                        account))
 
 (defn sell-ram-limit-order+poll
   "polling sell order until successful"
@@ -116,9 +118,9 @@
   (future
     (loop [result (sell-ram-limit-order+ram-fee amount price account)]
       (Thread/sleep TRADE-INTERVAL)
-      (println "trying to sell" amount "bytes of RAM at" price)
+      ;(println "trying to sell" amount "bytes of RAM at" price)
       (if (nil? result)
-        (recur (sell-ram-limit-order+ram-fee amount price account))
+        (recur (sell-ram-limit-order amount price account))
         result))))
 
 (comment
@@ -131,10 +133,10 @@
   (->utilization test-data) ;0.80756074
 
   (def buy-limit-order
-    (buy-ram-limit-order+poll 30 0.433 :kingslanding :kingslanding))
+    (buy-ram-limit-order+poll 30 0.470 :kingslanding :kingslanding))
   (future-cancel buy-limit-order)
 
   (def sell-limit-order
-    (sell-ram-limit-order+poll 1024 0.558 :kingslanding))
+    (sell-ram-limit-order+poll 61440 0.5 :kingslanding))
   (future-cancel sell-limit-order)
   )
