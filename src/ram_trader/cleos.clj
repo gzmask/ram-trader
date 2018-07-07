@@ -9,6 +9,7 @@
 
 (def ^:const keosd-http-server-address "http://127.0.0.1:8900")
 (def ^:const nodeos-http-server-address "http://api.eosnewyork.io")
+(def ^:const LOGIN-INTERVAL 30000) ;;milliseconds
 (def keosd (atom nil))
 
 (defn- start-local-wallet!
@@ -33,19 +34,36 @@
   (println (apply cleos args)))
 
 (defn login
-  [password]
+  [wallet-name password]
   (when-not (nil? @keosd)
     (start-local-wallet!))
-  (cleos "wallet" "open" "-n" "gzmask")
-  (cleos "wallet" "unlock" "-n" "gzmask" "--password" password))
+  (cleos :wallet :open "-n" wallet-name)
+  (cleos :wallet :unlock "-n" wallet-name "--password" password "--unlock-timeout" (str (/ LOGIN-INTERVAL 1000))))
+
+(defn- load-config []
+  (read-string
+   (slurp "resources/default.properties")))
+
+(defn keep-login []
+  (let [{password    :wallet-password
+         wallet-name :wallet-name} (load-config)]
+    (login wallet-name password)
+    (future (loop []
+              (Thread/sleep LOGIN-INTERVAL)
+              (login wallet-name password)
+              (recur)))))
 
 (defn logout-and-quit []
-  (cleos "wallet" "lock" "-n" "gzmask")
-  (cleos "wallet" "stop")
-  (future-cancel keosd))
+  (let [{password    :wallet-password
+         wallet-name :wallet-name} (load-config)]
+    (cleos "wallet" "lock" "-n" wallet-name)
+    (cleos "wallet" "stop")
+    (future-cancel keosd)))
 
 (comment
-  (login "password")
+  (def login
+    (keep-login))
+  (future-cancel login)
 
   (cleos! :wallet :list)
   (cleos! :get :account :hezdombqgege)

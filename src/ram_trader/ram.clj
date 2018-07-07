@@ -131,7 +131,7 @@
   (->utilization test-data) ;0.80756074
 
   (def buy-limit-order
-    (buy-ram-limit-order+poll 30 0.458 :kingslanding :kingslanding))
+    (buy-ram-limit-order+poll 30 0.433 :kingslanding :kingslanding))
   (future-cancel buy-limit-order)
 
   (def sell-limit-order
