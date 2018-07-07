@@ -29,6 +29,9 @@
       (:out res)
       (:err res))))
 
+(defn cleos! [& args]
+  (println (apply cleos args)))
+
 (defn login
   [password]
   (when-not (nil? @keosd)
@@ -39,16 +42,16 @@
 (defn logout-and-quit []
   (cleos "wallet" "lock" "-n" "gzmask")
   (cleos "wallet" "stop")
-  future-cancel @keosd)
+  (future-cancel keosd))
 
 (comment
   (login "password")
 
-  (cleos :wallet :list)
-  (cleos :get :account :hezdombqgege)
-  (cleos :get :account :kingslanding)
-  (cleos :system :listproducers)
-  (map (partial cleos :system :voteproducer :approve :kingslanding)
+  (cleos! :wallet :list)
+  (cleos! :get :account :hezdombqgege)
+  (cleos! :get :account :kingslanding)
+  (cleos! :system :listproducers)
+  (map (partial cleos! :system :voteproducer :approve :kingslanding)
        ["1eostheworld"   "cryptolions1"   "cypherglasss"
         "eos42freedom"   "eosamsterdam"   "eosauthority"
         "eoscafeblock"   "eoscanadacom"   "eoscannonchn"
