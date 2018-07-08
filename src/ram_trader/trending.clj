@@ -4,6 +4,8 @@
             [clj-time.format :as time.f]
             [ram-trader.cleos :as cleos :refer [cleos! cleos]]))
 
+(def ^:const TRADE-NUM 22) ;;smaller, more aggressive
+
 (defn recent-ram-trade
   "get the n number of most recent ram trades"
   [n]
@@ -39,9 +41,14 @@
    :interval (time/in-seconds (time/interval (:block_time (first ram-trades))
                                              (:block_time (last ram-trades))))))
 
+(defn get-delta []
+  (let [delta-info (delta-per-second (recent-ram-trade TRADE-NUM))]
+    (println "ram pool:" delta-info)
+    (:delta delta-info)))
+
 (comment
   (recent-ram-trade 22)
-  {:quantity -324.343, :block_time #object[org.joda.time.DateTime 0x17b941e1 "2018-07-08T04:27:33.500Z"]}
   (delta-per-second (recent-ram-trade 22))
+  (get-delta)
   )
 
