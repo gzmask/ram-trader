@@ -10,6 +10,10 @@
 (def ^:const keosd-http-server-address "http://127.0.0.1:8900")
 (def ^:const nodeos-http-server-address "http://api.eosnewyork.io")
 
+(defn load-config []
+  (read-string
+   (slurp "resources/default.properties")))
+
 (defn- start-local-wallet!
   "Returns a long running future. use (future-cancel ...) to stop the wallet"
   []
@@ -18,8 +22,9 @@
         (str "--http-server-address=" keosd-http-server-address))))
 
 (defn cleos [& args]
-  (let [cmd (concat ["sudo" "docker" "exec" "eosio" "/opt/eosio/bin/cleos"
-                     "--wallet-url" keosd-http-server-address
+  (let [cleos-alias (:cleos-alias (load-config))
+        cmd (concat cleos-alias
+                    ["--wallet-url" keosd-http-server-address
                      "-u" nodeos-http-server-address]
                     (map name args))
         res (apply sh cmd)]
@@ -29,10 +34,6 @@
 
 (defn cleos! [& args]
   (println (apply cleos args)))
-
-(defn- load-config []
-  (read-string
-   (slurp "resources/default.properties")))
 
 (defn login
   ([] (let [{password    :wallet-password
