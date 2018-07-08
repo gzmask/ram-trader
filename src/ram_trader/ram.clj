@@ -4,6 +4,8 @@
   (:require [cheshire.core :as json]
             [ram-trader.cleos :refer [cleos login] :as cleos]))
 
+(def ^:const RAM-FEE-RATE 0.005)
+
 (defn ->utilization
   "Given query result from (cleos :get :table :eosio :eosio :rammarket), returns the usage percentage."
   [query-result]
@@ -66,3 +68,4 @@
 
   (->EOS-price test-data) ;0.45891871728488004
   (->utilization test-data) ;0.80756074)
+  )

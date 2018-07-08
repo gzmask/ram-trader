@@ -5,7 +5,6 @@
             [ram-trader.ram :as ram]))
 
 (def ^:const TRADE-INTERVAL 5000) ;;milliseconds
-(def ^:const RAM-FEE-RATE 0.005)
 
 (defn buy-limit-trend-up
   [from to amount]
@@ -29,7 +28,7 @@
   "Also consider ram-fee"
   [amount price from to]
   (buy-ram-limit-order amount
-                       (- price RAM-FEE-RATE)
+                       (- price ram/RAM-FEE-RATE)
                        from to))
 
 (defn buy-ram-limit-order-when-trend-up+poll
@@ -65,7 +64,7 @@
   "Also consider ram-fee"
   [amount price account]
   (sell-ram-limit-order amount
-                        (+ price RAM-FEE-RATE)
+                        (+ price ram/RAM-FEE-RATE)
                         account))
 
 (defn sell-ram-limit-order-when-trend-down+poll
