@@ -78,6 +78,11 @@
         (recur (sell-ram-limit-order amount price account))
         result))))
 
+(defn buy-then-sell
+  "try to buy, if brought desired then try to sell the equivalant RAM."
+  [amount price from to]
+  )
+
 (comment
 
   (def buy-limit-order
