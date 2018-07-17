@@ -4,7 +4,7 @@
             [clj-time.format :as time.f]
             [ram-trader.cleos :as cleos :refer [cleos! cleos]]))
 
-(def ^:const TRADE-NUM 22) ;;smaller, more aggressive
+(def ^:const TRADE-NUM 6) ;;smaller, more aggressive
 
 (defn recent-ram-trade
   "get the n number of most recent ram trades"

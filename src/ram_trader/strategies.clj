@@ -85,10 +85,13 @@
 
 (comment
 
+  (def a
+    (buy-ram-limit-order 30 0.38999 :kingslanding :kingslanding))
+
   (def buy-limit-order
     (buy-ram-limit-order-when-trend-up+poll 30 0.430 :kingslanding :kingslanding))
   (future-cancel buy-limit-order)
 
   (def sell-limit-order
-    (sell-ram-limit-order-when-trend-down+poll 61440 0.5 :kingslanding))
+    (sell-ram-limit-order-when-trend-down+poll 847872 0.4 :kingslanding))
   (future-cancel sell-limit-order))
